@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="http://gdfe.co/feed.xml" rel="self" type="application/atom+xml" /><link href="http://gdfe.co/" rel="alternate" type="text/html" /><updated>2016-08-03T17:23:37-05:00</updated><id>http://gdfe.co/</id><title>gdfe.co</title><subtitle>Putting words on &lt;del&gt;paper&lt;/del&gt; the internet</subtitle><entry><title>The Project</title><link href="http://gdfe.co/blog/The-Project/" rel="alternate" type="text/html" title="The Project" /><published>2016-08-03T00:00:00-05:00</published><updated>2016-08-03T00:00:00-05:00</updated><id>http://gdfe.co/blog/The-Project</id><content type="html" xml:base="http://gdfe.co/blog/The-Project/">&lt;p&gt;A project that’s been on my mind lately is to make a map of the Twin Cities 
+to hang on the wall. I’ve always thought maps are pretty and the visualization 
+of data feels like a fun way to try to have a more artistic outlet than I’ve 
+traditionally been able to find.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-inspiration&quot;&gt;The inspiration&lt;/h2&gt;
+
+&lt;p&gt;I think the idea for using maps as an art project come from this guy’s 
+&lt;a href=&quot;https://www.reddit.com/r/DIY/comments/3yenuu/i_laser_cut_a_topo_map_of_my_hometown_of_portland/&quot;&gt;amazing laser-cut wood hanging&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Since I’m hoping to have all the fiddly parts be in the digital realm, 
+I immediatley ruled out wood-cutting. So, looking for beautiful maps, I found 
+&lt;a href=&quot;http://beautifuldecay.com/2015/08/31/anna-bellmans-cut-paper-street-maps-puts-minimalist-spin-cartography/&quot;&gt;this series&lt;/a&gt; &lt;a href=&quot;https://s-media-cache-ak0.pinimg.com/736x/d1/e5/d9/d1e5d96a56a7e269190dd75b8e40dbeb.jpg&quot;&gt;or this&lt;/a&gt; of roads as line maps. I’ve also always been fond of those
+typographic maps with neighborhood names &lt;a href=&quot;http://www.orkposters.com/minneapolis.html&quot;&gt;like&lt;/a&gt; &lt;a href=&quot;http://www.orkposters.com/saintpaul.html&quot;&gt;these&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;data&quot;&gt;Data&lt;/h2&gt;
+
+&lt;p&gt;My initial ideas for data layers that could be included on the map are:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Road data&lt;/li&gt;
+  &lt;li&gt;Bike lanes&lt;/li&gt;
+  &lt;li&gt;Water features&lt;/li&gt;
+  &lt;li&gt;Topography&lt;/li&gt;
+  &lt;li&gt;Breweries&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The first 3 seem like they could come from government sources, but would all be in the same format if they came from &lt;a href=&quot;https://openstreetmaps.org&quot;&gt;Open Street Maps&lt;/a&gt;. The fourth should be easy enough from &lt;a href=&quot;http://ngmdb.usgs.gov/maps/TopoView/&quot;&gt;USGS data&lt;/a&gt;, and a quick google search
+revealed &lt;a href=&quot;http://growlermag.com/minnesota-brewery-map/&quot;&gt;this list of breweries&lt;/a&gt;.&lt;/p&gt;</content><author><name>Greg</name></author><category term="map-project" /><summary>A project that’s been on my mind lately is to make a map of the Twin Cities 
+to hang on the wall. I’ve always thought maps are pretty and the visualization 
+of data feels like a fun way to try to have a more artistic outlet than I’ve 
+traditionally been able to find.</summary></entry><entry><title>Why Post Here?</title><link href="http://gdfe.co/blog/Why-Post/" rel="alternate" type="text/html" title="Why Post Here?" /><published>2016-08-01T00:00:00-05:00</published><updated>2016-08-01T00:00:00-05:00</updated><id>http://gdfe.co/blog/Why-Post</id><content type="html" xml:base="http://gdfe.co/blog/Why-Post/">&lt;p&gt;I can tell how much I’m procrastinating actually writing a blog post 
+because of how much time I’ve spent messing around with the appearance 
+of this website, and other fiddly deatils – which is a bummer because 
+they were supposed to be secondary.&lt;/p&gt;
+
+&lt;p&gt;As a lifehack for coming up with a first topic to write about my first post will be so naval-gazey and meta that I’ll want to quickly write another one
+to hide how horrible this first one is.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;So why am I, a person who has a &lt;a href=&quot;https://twitter.com/gregfreedman&quot;&gt;twitter&lt;/a&gt; 
+with 0 tweets, a facebook page devoted almost enirely to the once-a-year 
+phenomenon of people being reminded about my birthday, and who otherwise 
+spends his time lurking rather than posting, making a blog?&lt;/p&gt;
+
+&lt;h2 id=&quot;other-places-never-felt-right&quot;&gt;1) Other places never felt right&lt;/h2&gt;
+&lt;p&gt;It feels weird to blather on about the topics I’m 
+interested in on social media sites. Perhaps I have an overly-
+compartmentalized identity, but I don’t love the conflation of 
+friendship with the expectation that you’ll be interested in what I 
+have to say about, for example, data visualization. At best, posts on 
+social media feel to me like two people shouting a conversation to make 
+sure everyone hears how smart/funny/whatever they are. I hope by 
+separating my writing away, I won’t be doing that.&lt;/p&gt;
+
+&lt;h2 id=&quot;need-to-practice-writing&quot;&gt;2) Need to practice writing&lt;/h2&gt;
+&lt;p&gt;I’m trying to change my atitude from “I’m (inherently) not good at writing” to 
+“I’m not good at writing (yet)”, since the 
+&lt;a href=&quot;http://www.radiolab.org/story/91971-secrets-of-success/&quot;&gt;pop-psychology&lt;/a&gt; 
+of the day says this can be effective. We’ll see if it replicates ;)&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;I remember enough from high school english that I should have &lt;a href=&quot;http://ualr.edu/blackboard/2013/10/23/the-a-paper-writing-stronger-papers/&quot;&gt;3 
+points to my thesis&lt;/a&gt; 
+- but this new rebel version of me trying to actually enjoy writing refuses.&lt;/p&gt;</content><author><name>Greg</name></author><category term="meta" /><summary>I can tell how much I’m procrastinating actually writing a blog post 
+because of how much time I’ve spent messing around with the appearance 
+of this website, and other fiddly deatils – which is a bummer because 
+they were supposed to be secondary.</summary></entry></feed>

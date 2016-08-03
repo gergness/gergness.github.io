@@ -18,6 +18,12 @@
     }
 }
 
+.site-description {
+	del {
+		color: $h1-color;
+	}
+}
+
  .post {
         a {
          color: $mono-color;
@@ -108,7 +114,7 @@ button.button-primary:focus {
 
 @media only screen and (min-width: 768px) {
   .intro-header .post-heading{
-    padding: 150px 0;
+    padding: 100px 0 75px 0;
   }
 }
 

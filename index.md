@@ -19,7 +19,7 @@ complex survey data, and hopefully details on a few more coming to the
 [blog here](/blog) soon (hopefully).
 
 I'm currently looking for a job, here's a [pdf resume](/about/gdfe_resume.pdf). If you think I'm a good fit for a position or project, please 
-[get in touch](#).
+[get in touch](mailto:gdfe.co.mail@gmail.com).
 
 This site is a learning project, so it's based on a lot of other people's 
 work, find out more details [here](/about/colophon).

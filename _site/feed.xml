@@ -1,4 +1,373 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="http://gdfe.co/feed.xml" rel="self" type="application/atom+xml" /><link href="http://gdfe.co/" rel="alternate" type="text/html" /><updated>2016-08-03T17:23:37-05:00</updated><id>http://gdfe.co/</id><title>gdfe.co</title><subtitle>Putting words on &lt;del&gt;paper&lt;/del&gt; the internet</subtitle><entry><title>The Project</title><link href="http://gdfe.co/blog/The-Project/" rel="alternate" type="text/html" title="The Project" /><published>2016-08-03T00:00:00-05:00</published><updated>2016-08-03T00:00:00-05:00</updated><id>http://gdfe.co/blog/The-Project</id><content type="html" xml:base="http://gdfe.co/blog/The-Project/">&lt;p&gt;A project that’s been on my mind lately is to make a map of the Twin Cities 
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="http://gdfe.co/feed.xml" rel="self" type="application/atom+xml" /><link href="http://gdfe.co/" rel="alternate" type="text/html" /><updated>2016-08-26T11:49:39-05:00</updated><id>http://gdfe.co/</id><title>gdfe.co</title><subtitle>Putting words on &lt;del&gt;paper&lt;/del&gt; the internet</subtitle><entry><title>Introducing osmar2</title><link href="http://gdfe.co/blog/Introducing-osmar2/" rel="alternate" type="text/html" title="Introducing osmar2" /><published>2016-08-23T00:00:00-05:00</published><updated>2016-08-23T00:00:00-05:00</updated><id>http://gdfe.co/blog/Introducing-osmar2</id><content type="html" xml:base="http://gdfe.co/blog/Introducing-osmar2/">&lt;p&gt;osmar2 is a version of the &lt;a href=&quot;http://cran.r-project.org/package=osmar&quot;&gt;osmar
+package&lt;/a&gt; (“OpenStreetMap and
+R”) rewritten to use xml2 package instead of XML, and some other
+adaptations to allow for much quicker reading of .osm files. It’s
+available on &lt;a href=&quot;https://github.com/gergness/osmar2&quot;&gt;github&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The part I wanted to spend some time writing about here was the
+optimization and debugging process that went into making it faster.
+Going into this project, I was pretty sure that the package there were
+inefficiencies in reading files because even though the files were
+relatively small (10Mb), osmar was already taking several minutes to
+load, whereas a &lt;code class=&quot;highlighter-rouge&quot;&gt;read.csv()&lt;/code&gt; (or better, &lt;code class=&quot;highlighter-rouge&quot;&gt;readr::read_csv()&lt;/code&gt;) could read
+that size in less than a second.&lt;/p&gt;
+
+&lt;p&gt;So, I first thought that just switching over to xml2 would be most of
+what I needed, but when I had finished rewriting the code using the
+original osmar package’s approach updated with xml2 funcitons instead of
+XML, there wasn’t much of an improvement.What ended up speeding things
+up was a change in the parsing algorithm.&lt;/p&gt;
+
+&lt;p&gt;Here’s a sample osm xml file, which I’ve simplified so that only has a
+few nodes and have removed some tags that aren’t used (more details on
+osm files &lt;a href=&quot;http://wiki.openstreetmap.org/wiki/OSM_XML&quot;&gt;here&lt;/a&gt;).&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;#&amp;gt;  ...
+#&amp;gt;  &amp;lt;node id=&quot;506685546&quot; lat=&quot;44.9493365&quot; lon=&quot;-93.1692413&quot; version=&quot;1&quot;/&amp;gt;
+#&amp;gt;  &amp;lt;node id=&quot;506685547&quot; lat=&quot;44.9496459&quot; lon=&quot;-93.1691436&quot; version=&quot;1&quot;&amp;gt;
+#&amp;gt;      &amp;lt;tag k=&quot;highway&quot; v=&quot;turning_circle&quot;/&amp;gt;
+#&amp;gt;  &amp;lt;/node&amp;gt;
+#&amp;gt;  &amp;lt;node id=&quot;530739183&quot; lat=&quot;44.9399208&quot; lon=&quot;-93.1875805&quot; version=&quot;1&quot;&amp;gt;
+#&amp;gt;      &amp;lt;tag k=&quot;name&quot; v=&quot;Davanni&amp;amp;#39;s Pizza &amp;amp;#38; Hot Hoagies&quot;/&amp;gt;
+#&amp;gt;      &amp;lt;tag k=&quot;amenity&quot; v=&quot;restaurant&quot;/&amp;gt;
+#&amp;gt;      &amp;lt;tag k=&quot;cuisine&quot; v=&quot;italian&quot;/&amp;gt;
+#&amp;gt;  &amp;lt;/node&amp;gt;
+#&amp;gt;  ...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;One of the slowest part of parsing the file in the original osmar
+package is when creating a dataset of the tag variables. This dataset
+needs one row per &lt;code class=&quot;highlighter-rouge&quot;&gt;tag&lt;/code&gt; node, but includes a variable from that &lt;code class=&quot;highlighter-rouge&quot;&gt;tag&lt;/code&gt;’s
+parent &lt;code class=&quot;highlighter-rouge&quot;&gt;node&lt;/code&gt; (the &lt;code class=&quot;highlighter-rouge&quot;&gt;id&lt;/code&gt; variable). &lt;code class=&quot;highlighter-rouge&quot;&gt;id&lt;/code&gt; from the node. The original way
+I attacked this looked something like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;old_method &amp;lt;- function() {
+  # Find all of the nodes with at least one tag
+  nodes &amp;lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
+  
+  # Pull those nodes&#39; ids
+  ids &amp;lt;- xml_attr(nodes, &quot;id&quot;)
+  
+  # Pull those nodes&#39; (1 or more) tags into a list of data.frames()
+  tags &amp;lt;- lapply(nodes, function(parent_node) {
+    tag_nodes &amp;lt;- xml_find_all(parent_node, &quot;./tag&quot;)
+    
+    data_frame(k = xml_attr(tag_nodes, &quot;k&quot;), 
+               v = xml_attr(tag_nodes, &quot;v&quot;))
+  })
+  
+  # And convert that to a single long data.frame
+  out_df &amp;lt;- data_frame(ids, 
+                       tags = tags) %&amp;gt;%
+    unnest()
+  
+  out_df
+}
+
+old &amp;lt;- old_method() 
+old %&amp;gt;% print(n = 3)
+#&amp;gt; # A tibble: 4,616 x 3
+#&amp;gt;         ids       k               v
+#&amp;gt;       &amp;lt;chr&amp;gt;   &amp;lt;chr&amp;gt;           &amp;lt;chr&amp;gt;
+#&amp;gt; 1 187845021 highway mini_roundabout
+#&amp;gt; 2 187854927 highway mini_roundabout
+#&amp;gt; 3 187854980  noexit             yes
+#&amp;gt; # ... with 4,613 more rows
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;As I began to dig into this, I learned that some of the xml2 functions
+allow you to perform the entire operations in C and so are very fast,
+while others force the code into R objects and so have much slower
+looping. So, it doesn’t always make sense to try to save your place in
+the xml document to avoid having to repeatedly search for the same
+spots, because this may force you to loop in R rather than C. For
+example:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;system.time(
+  osm_xml_root %&amp;gt;% 
+    xml_find_all(&quot;/osm/node&quot;) %&amp;gt;%
+    xml_find_all(&quot;tag/@k&quot;) %&amp;gt;% 
+    xml_text()
+)
+#&amp;gt;    user  system elapsed 
+#&amp;gt;   3.005   0.029   3.035
+
+# Is 30X slower than this:
+
+system.time(
+  osm_xml_root %&amp;gt;%
+    xml_find_all(&quot;/osm/node/tag/@k&quot;) %&amp;gt;%
+    xml_text()
+)
+#&amp;gt;    user  system elapsed 
+#&amp;gt;   0.120   0.003   0.123
+
+# So even though the second method requires us to search from the top
+# of the tree for the k and v variable separately, it is still faster.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The only problem being that we need a way to find out which node id this
+particular key/value belong to. This requires some tricky(-ish) xpath.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# Find all nodes with at least one tag and get their id
+nodes &amp;lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
+id &amp;lt;- xml_attr(nodes, &quot;id&quot;)
+# Find out how many tags are below each of these nodes and
+# repeat the id that many times
+lens &amp;lt;- xml_find_num(nodes, &quot;count(./tag)&quot;)
+id &amp;lt;- rep(id, lens)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Putting it all together, we get:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;new_method &amp;lt;- function() {
+  # Find all of the nodes with at least one tag and pull their ids
+  nodes &amp;lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
+  ids &amp;lt;- xml_attr(nodes, &quot;id&quot;)
+  
+  # Find out how many tags are below each of these nodes and
+  # repeat the id that many times
+  lens &amp;lt;- xml_find_num(nodes, &quot;count(./tag)&quot;)
+  ids &amp;lt;- rep(ids, lens)
+  
+  # Pull the tag&#39;s keys and values
+  keys &amp;lt;- osm_xml_root %&amp;gt;%
+    xml_find_all(&quot;/osm/node/tag/@k&quot;) %&amp;gt;%
+    xml_text()
+  
+  values &amp;lt;- osm_xml_root %&amp;gt;%
+    xml_find_all(&quot;/osm/node/tag/@v&quot;) %&amp;gt;%
+    xml_text()
+  
+  data_frame(ids = ids,
+             k = keys,
+             v = values)
+}
+new &amp;lt;- new_method()
+new %&amp;gt;% print(n = 3)
+#&amp;gt; # A tibble: 4,616 x 3
+#&amp;gt;         ids       k               v
+#&amp;gt;       &amp;lt;chr&amp;gt;   &amp;lt;chr&amp;gt;           &amp;lt;chr&amp;gt;
+#&amp;gt; 1 187845021 highway mini_roundabout
+#&amp;gt; 2 187854927 highway mini_roundabout
+#&amp;gt; 3 187854980  noexit             yes
+#&amp;gt; # ... with 4,613 more rows
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Which gives the same result, but much more quickly than the old method:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;microbenchmark(old = old &amp;lt;- old_method(), 
+               new = new &amp;lt;- new_method(), 
+               times = 5)
+#&amp;gt; Unit: milliseconds
+#&amp;gt;  expr       min       lq      mean    median       uq       max neval
+#&amp;gt;   old 3648.1691 3697.593 3906.4411 3949.5129 4015.202 4221.7289     5
+#&amp;gt;   new  354.0688  374.710  380.0945  378.4144  380.622  412.6573     5
+
+identical(old, new)
+#&amp;gt; [1] TRUE
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This makes me wonder whether it’d be easier for xml2 to have a function
+along the lines of &lt;code class=&quot;highlighter-rouge&quot;&gt;xml_find_list()&lt;/code&gt; so that you could more easily
+select multiple queries using the quicker C code. I’m not exactly sure
+how this would work though. Also, possibly I’m missing something and
+there’s an easier way to do this. If there is, &lt;a href=&quot;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#116;&amp;#111;:&amp;#103;&amp;#100;&amp;#102;&amp;#101;&amp;#046;&amp;#099;&amp;#111;&amp;#046;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#064;&amp;#103;&amp;#109;&amp;#097;&amp;#105;&amp;#108;&amp;#046;&amp;#099;&amp;#111;&amp;#109;&quot;&gt;let me
+know&lt;/a&gt;.&lt;/p&gt;</content><author><name>Greg</name></author><category term="osmar2" /><summary>osmar2 is a version of the osmar
+package (“OpenStreetMap and
+R”) rewritten to use xml2 package instead of XML, and some other
+adaptations to allow for much quicker reading of .osm files. It’s
+available on github.</summary></entry><entry><title>Introducing Osmar2</title><link href="http://gdfe.co/blog/Introducing-osmar2/" rel="alternate" type="text/html" title="Introducing Osmar2" /><published>2016-08-23T00:00:00-05:00</published><updated>2016-08-23T00:00:00-05:00</updated><id>http://gdfe.co/blog/Introducing-osmar2</id><content type="html" xml:base="http://gdfe.co/blog/Introducing-osmar2/">\---  
+layout: post  
+title: Introducing osmar2  
+author: Greg  
+tags: osmar2  
+\---  
+
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = &quot;#&gt;&quot;,
+  fig.path = &quot;images/blog/2016-08-23/&quot;,
+  retina = TRUE
+)
+knitr::opts_knit$set(base.dir = &quot;../&quot;, 
+                     base.url = &quot;/&quot;)
+
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(xml2)  
+  library(tidyr)
+  library(microbenchmark)
+})
+```
+osmar2 is a version of the [osmar package](http://cran.r-project.org/package=osmar) 
+(&quot;OpenStreetMap and R&quot;) rewritten to use xml2 package instead of XML, 
+and some other adaptations to allow for much quicker reading of .osm files. It&#39;s 
+available on [github](https://github.com/gergness/osmar2).
+
+The part I wanted to spend some time writing about here was the optimization and 
+debugging process that went into making it faster. Going into this project, I was
+pretty sure that the package there were inefficiencies in reading files because even
+though the files were relatively small (10Mb), osmar was already taking several minutes 
+to load, whereas a `read.csv()` (or better, `readr::read_csv()`) could
+read that size in less than a second.
+
+So, I first thought that just switching over to xml2 would be most of what I needed, but 
+when I had finished rewriting the code using the original osmar package&#39;s approach updated
+with xml2 funcitons instead of XML, there wasn&#39;t much of an improvement.What ended up 
+speeding things up was a change in the parsing algorithm.
+
+Here&#39;s a sample osm xml file, which I&#39;ve simplified so that only has a few nodes and 
+have removed some tags that aren&#39;t used (more details on osm files 
+[here](http://wiki.openstreetmap.org/wiki/OSM_XML)).
+
+```{r, echo = FALSE}
+small_file &lt;- tempfile()
+download.file(&quot;https://dl.dropboxusercontent.com/u/2019891/osmar2/TC_small_osm_file.osm&quot;, small_file)
+
+osm_lines &lt;- readLines(small_file)
+
+# Some arbitrary lines to get a sense of file structure
+osm_lines[c(1545:1548, 1553:1557)] %&gt;% 
+  c(&quot;\t...&quot;, ., &quot;\t...&quot;) %&gt;% 
+  paste(collapse = &quot;\n&quot;) %&gt;%
+  cat()
+
+# Read it in as an xml file
+osm_xml &lt;- read_xml(small_file)
+osm_xml_root &lt;- xml_root(osm_xml)
+
+```
+
+One of the slowest part of parsing the file in the original osmar package is
+when creating a dataset of the tag variables. This dataset needs one row per `tag` node,
+but includes a variable from that `tag`&#39;s parent `node` (the `id` variable). 
+`id` from the node. The original way I attacked this looked something like this:
+
+```{r}
+old_method &lt;- function() {
+  # Find all of the nodes with at least one tag
+  nodes &lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
+  
+  # Pull those nodes&#39; ids
+  ids &lt;- xml_attr(nodes, &quot;id&quot;)
+  
+  # Pull those nodes&#39; (1 or more) tags into a list of data.frames()
+  tags &lt;- lapply(nodes, function(parent_node) {
+    tag_nodes &lt;- xml_find_all(parent_node, &quot;./tag&quot;)
+    
+    data_frame(k = xml_attr(tag_nodes, &quot;k&quot;), 
+               v = xml_attr(tag_nodes, &quot;v&quot;))
+  })
+  
+  # And convert that to a single long data.frame
+  out_df &lt;- data_frame(ids, 
+                       tags = tags) %&gt;%
+    unnest()
+  
+  out_df
+}
+
+old &lt;- old_method() 
+old %&gt;% print(n = 3)
+```
+
+As I began to dig into this, I learned that some of the xml2 functions allow you to
+perform the entire operations in C and so are very fast, while others force the code
+into R objects and so have much slower looping. So, it doesn&#39;t always make sense
+to try to save your place in the xml document to avoid having to repeatedly search
+for the same spots, because this may force you to loop in R rather than C. For example:
+
+```{r}
+system.time(
+  osm_xml_root %&gt;% 
+    xml_find_all(&quot;/osm/node&quot;) %&gt;%
+    xml_find_all(&quot;tag/@k&quot;) %&gt;% 
+    xml_text()
+)
+
+# Is 30X slower than this:
+
+system.time(
+  osm_xml_root %&gt;%
+    xml_find_all(&quot;/osm/node/tag/@k&quot;) %&gt;%
+    xml_text()
+)
+
+# So even though the second method requires us to search from the top
+# of the tree for the k and v variable separately, it is still faster.
+```
+
+The only problem being that we need a way to find out which node id this particular
+key/value belong to. This requires some tricky(-ish) xpath.
+
+```{r}
+# Find all nodes with at least one tag and get their id
+nodes &lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
+id &lt;- xml_attr(nodes, &quot;id&quot;)
+# Find out how many tags are below each of these nodes and
+# repeat the id that many times
+lens &lt;- xml_find_num(nodes, &quot;count(./tag)&quot;)
+id &lt;- rep(id, lens)
+```
+
+Putting it all together, we get:
+```{r}
+new_method &lt;- function() {
+  # Find all of the nodes with at least one tag and pull their ids
+  nodes &lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
+  ids &lt;- xml_attr(nodes, &quot;id&quot;)
+  
+  # Find out how many tags are below each of these nodes and
+  # repeat the id that many times
+  lens &lt;- xml_find_num(nodes, &quot;count(./tag)&quot;)
+  ids &lt;- rep(ids, lens)
+  
+  # Pull the tag&#39;s keys and values
+  keys &lt;- osm_xml_root %&gt;%
+    xml_find_all(&quot;/osm/node/tag/@k&quot;) %&gt;%
+    xml_text()
+  
+  values &lt;- osm_xml_root %&gt;%
+    xml_find_all(&quot;/osm/node/tag/@v&quot;) %&gt;%
+    xml_text()
+  
+  data_frame(ids = ids,
+             k = keys,
+             v = values)
+}
+new &lt;- new_method()
+new %&gt;% print(n = 3)
+```
+
+Which gives the same result, but much more quickly than the old method:
+
+```{r}
+microbenchmark(old = old &lt;- old_method(), 
+               new = new &lt;- new_method(), 
+               times = 5)
+
+identical(old, new)
+```
+
+This makes me wonder whether it&#39;d be easier for xml2 to have a function along 
+the lines of `xml_find_list()` so that you could more easily select multiple 
+queries using the quicker C code. I&#39;m not exactly sure how this would work though.
+Also, possibly I&#39;m missing something and there&#39;s an easier way to do this. If there is, 
+[let me know](mailto:gdfe.co.mail@gmail.com).</content><summary>\---  
+layout: post  
+title: Introducing osmar2  
+author: Greg  
+tags: osmar2  
+\---</summary></entry><entry><title>The Project</title><link href="http://gdfe.co/blog/The-Project/" rel="alternate" type="text/html" title="The Project" /><published>2016-08-03T00:00:00-05:00</published><updated>2016-08-03T00:00:00-05:00</updated><id>http://gdfe.co/blog/The-Project</id><content type="html" xml:base="http://gdfe.co/blog/The-Project/">&lt;p&gt;A project that’s been on my mind lately is to make a map of the Twin Cities 
 to hang on the wall. I’ve always thought maps are pretty and the visualization 
 of data feels like a fun way to try to have a more artistic outlet than I’ve 
 traditionally been able to find.&lt;/p&gt;

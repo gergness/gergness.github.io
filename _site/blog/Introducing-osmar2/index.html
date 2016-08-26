@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Introducing osmar2 – gdfe.co – Putting words on <del>paper</del> the internet</title>
+
+        <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="osmar2 is a version of the osmar
+package (“OpenStreetMap and
+R”) rewritten to use xml2 package instead of XML, and some other
+adaptations to allow for much quicker reading of .osm files. It’s
+available on github.
+
+" />
+    <meta property="og:description" content="osmar2 is a version of the osmar
+package (“OpenStreetMap and
+R”) rewritten to use xml2 package instead of XML, and some other
+adaptations to allow for much quicker reading of .osm files. It’s
+available on github.
+
+" />
+    
+    <meta name="author" content="gdfe.co" />
+
+    
+    <meta property="og:title" content="Introducing osmar2" />
+    <meta property="twitter:title" content="Introducing osmar2" />
+    
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <link rel="alternate" type="application/rss+xml" title="gdfe.co - Putting words on <del>paper</del> the internet" href="/feed.xml" />
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+
+  </head>
+
+  <body>
+    
+    
+    <div class="intro-header"> 
+       <div class="wrapper-masthead">
+         <div class="container">
+           <header class="masthead clearfix">
+             <div class="site-info">
+               <h1 class="site-name"><a href="/">gdfe.co</a></h1>
+               <p class="site-description">Putting words on <del>paper</del> the internet</p>
+             </div>
+             <nav>
+               <a href="/">About</a>
+               <a href="/blog">Blog</a>
+               <a href="/projects">Projects</a>
+             </nav>
+             </header>
+             <div class="post-heading">
+              <h1>Introducing osmar2</h1>
+              <span class="meta">Posted by <a href="/about"> Greg
+                </a> on August 23, 2016
+                <br><br><a href="/">Return to Blog</a>
+              </span>
+            </div>
+         </div>
+       </div> 
+    </div>
+
+    
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+
+
+  <div class="entry">
+    <p>osmar2 is a version of the <a href="http://cran.r-project.org/package=osmar">osmar
+package</a> (“OpenStreetMap and
+R”) rewritten to use xml2 package instead of XML, and some other
+adaptations to allow for much quicker reading of .osm files. It’s
+available on <a href="https://github.com/gergness/osmar2">github</a>.</p>
+
+<p>The part I wanted to spend some time writing about here was the
+optimization and debugging process that went into making it faster.
+Going into this project, I was pretty sure that the package there were
+inefficiencies in reading files because even though the files were
+relatively small (10Mb), osmar was already taking several minutes to
+load, whereas a <code class="highlighter-rouge">read.csv()</code> (or better, <code class="highlighter-rouge">readr::read_csv()</code>) could read
+that size in less than a second.</p>
+
+<p>So, I first thought that just switching over to xml2 would be most of
+what I needed, but when I had finished rewriting the code using the
+original osmar package’s approach updated with xml2 funcitons instead of
+XML, there wasn’t much of an improvement.What ended up speeding things
+up was a change in the parsing algorithm.</p>
+
+<p>Here’s a sample osm xml file, which I’ve simplified so that only has a
+few nodes and have removed some tags that aren’t used (more details on
+osm files <a href="http://wiki.openstreetmap.org/wiki/OSM_XML">here</a>).</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>#&gt;  ...
+#&gt;  &lt;node id="506685546" lat="44.9493365" lon="-93.1692413" version="1"/&gt;
+#&gt;  &lt;node id="506685547" lat="44.9496459" lon="-93.1691436" version="1"&gt;
+#&gt;      &lt;tag k="highway" v="turning_circle"/&gt;
+#&gt;  &lt;/node&gt;
+#&gt;  &lt;node id="530739183" lat="44.9399208" lon="-93.1875805" version="1"&gt;
+#&gt;      &lt;tag k="name" v="Davanni&amp;#39;s Pizza &amp;#38; Hot Hoagies"/&gt;
+#&gt;      &lt;tag k="amenity" v="restaurant"/&gt;
+#&gt;      &lt;tag k="cuisine" v="italian"/&gt;
+#&gt;  &lt;/node&gt;
+#&gt;  ...
+</code></pre>
+</div>
+
+<p>One of the slowest part of parsing the file in the original osmar
+package is when creating a dataset of the tag variables. This dataset
+needs one row per <code class="highlighter-rouge">tag</code> node, but includes a variable from that <code class="highlighter-rouge">tag</code>’s
+parent <code class="highlighter-rouge">node</code> (the <code class="highlighter-rouge">id</code> variable). <code class="highlighter-rouge">id</code> from the node. The original way
+I attacked this looked something like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>old_method &lt;- function() {
+  # Find all of the nodes with at least one tag
+  nodes &lt;- xml_find_all(osm_xml_root, "/osm/node[./tag]")
+  
+  # Pull those nodes' ids
+  ids &lt;- xml_attr(nodes, "id")
+  
+  # Pull those nodes' (1 or more) tags into a list of data.frames()
+  tags &lt;- lapply(nodes, function(parent_node) {
+    tag_nodes &lt;- xml_find_all(parent_node, "./tag")
+    
+    data_frame(k = xml_attr(tag_nodes, "k"), 
+               v = xml_attr(tag_nodes, "v"))
+  })
+  
+  # And convert that to a single long data.frame
+  out_df &lt;- data_frame(ids, 
+                       tags = tags) %&gt;%
+    unnest()
+  
+  out_df
+}
+
+old &lt;- old_method() 
+old %&gt;% print(n = 3)
+#&gt; # A tibble: 4,616 x 3
+#&gt;         ids       k               v
+#&gt;       &lt;chr&gt;   &lt;chr&gt;           &lt;chr&gt;
+#&gt; 1 187845021 highway mini_roundabout
+#&gt; 2 187854927 highway mini_roundabout
+#&gt; 3 187854980  noexit             yes
+#&gt; # ... with 4,613 more rows
+</code></pre>
+</div>
+
+<p>As I began to dig into this, I learned that some of the xml2 functions
+allow you to perform the entire operations in C and so are very fast,
+while others force the code into R objects and so have much slower
+looping. So, it doesn’t always make sense to try to save your place in
+the xml document to avoid having to repeatedly search for the same
+spots, because this may force you to loop in R rather than C. For
+example:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>system.time(
+  osm_xml_root %&gt;% 
+    xml_find_all("/osm/node") %&gt;%
+    xml_find_all("tag/@k") %&gt;% 
+    xml_text()
+)
+#&gt;    user  system elapsed 
+#&gt;   3.005   0.029   3.035
+
+# Is 30X slower than this:
+
+system.time(
+  osm_xml_root %&gt;%
+    xml_find_all("/osm/node/tag/@k") %&gt;%
+    xml_text()
+)
+#&gt;    user  system elapsed 
+#&gt;   0.120   0.003   0.123
+
+# So even though the second method requires us to search from the top
+# of the tree for the k and v variable separately, it is still faster.
+</code></pre>
+</div>
+
+<p>The only problem being that we need a way to find out which node id this
+particular key/value belong to. This requires some tricky(-ish) xpath.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code># Find all nodes with at least one tag and get their id
+nodes &lt;- xml_find_all(osm_xml_root, "/osm/node[./tag]")
+id &lt;- xml_attr(nodes, "id")
+# Find out how many tags are below each of these nodes and
+# repeat the id that many times
+lens &lt;- xml_find_num(nodes, "count(./tag)")
+id &lt;- rep(id, lens)
+</code></pre>
+</div>
+
+<p>Putting it all together, we get:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>new_method &lt;- function() {
+  # Find all of the nodes with at least one tag and pull their ids
+  nodes &lt;- xml_find_all(osm_xml_root, "/osm/node[./tag]")
+  ids &lt;- xml_attr(nodes, "id")
+  
+  # Find out how many tags are below each of these nodes and
+  # repeat the id that many times
+  lens &lt;- xml_find_num(nodes, "count(./tag)")
+  ids &lt;- rep(ids, lens)
+  
+  # Pull the tag's keys and values
+  keys &lt;- osm_xml_root %&gt;%
+    xml_find_all("/osm/node/tag/@k") %&gt;%
+    xml_text()
+  
+  values &lt;- osm_xml_root %&gt;%
+    xml_find_all("/osm/node/tag/@v") %&gt;%
+    xml_text()
+  
+  data_frame(ids = ids,
+             k = keys,
+             v = values)
+}
+new &lt;- new_method()
+new %&gt;% print(n = 3)
+#&gt; # A tibble: 4,616 x 3
+#&gt;         ids       k               v
+#&gt;       &lt;chr&gt;   &lt;chr&gt;           &lt;chr&gt;
+#&gt; 1 187845021 highway mini_roundabout
+#&gt; 2 187854927 highway mini_roundabout
+#&gt; 3 187854980  noexit             yes
+#&gt; # ... with 4,613 more rows
+</code></pre>
+</div>
+
+<p>Which gives the same result, but much more quickly than the old method:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>microbenchmark(old = old &lt;- old_method(), 
+               new = new &lt;- new_method(), 
+               times = 5)
+#&gt; Unit: milliseconds
+#&gt;  expr       min       lq      mean    median       uq       max neval
+#&gt;   old 3648.1691 3697.593 3906.4411 3949.5129 4015.202 4221.7289     5
+#&gt;   new  354.0688  374.710  380.0945  378.4144  380.622  412.6573     5
+
+identical(old, new)
+#&gt; [1] TRUE
+</code></pre>
+</div>
+
+<p>This makes me wonder whether it’d be easier for xml2 to have a function
+along the lines of <code class="highlighter-rouge">xml_find_list()</code> so that you could more easily
+select multiple queries using the quicker C code. I’m not exactly sure
+how this would work though. Also, possibly I’m missing something and
+there’s an easier way to do this. If there is, <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#103;&#100;&#102;&#101;&#046;&#099;&#111;&#046;&#109;&#097;&#105;&#108;&#064;&#103;&#109;&#097;&#105;&#108;&#046;&#099;&#111;&#109;">let me
+know</a>.</p>
+
+  </div>
+
+  
+</article>
+
+
+    </div>
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+            <div class="svg-icon">
+          
+<a href="mailto:gdfe.co.mail@gmail.com"><i class="icon-envelope icon-2x"></i></a>
+
+
+<a href="https://github.com/gergness"><i class="icon-github icon-2x"></i></a>
+
+
+
+
+<a href="https://www.twitter.com/gregfreedman"><i class="icon-twitter icon-2x"></i></a>
+
+
+
+            </div>
+        </footer>
+      </div>
+    </div>
+
+
+    
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-81635172-1', 'auto');
+		ga('send', 'pageview', {
+		  'page': '/blog/Introducing-osmar2/',
+		  'title': 'Introducing osmar2'
+		});
+	</script>
+	<!-- End Google Analytics -->
+
+
+  </body>
+</html>

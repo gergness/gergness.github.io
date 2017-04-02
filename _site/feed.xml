@@ -1,4 +1,210 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="http://gdfe.co/feed.xml" rel="self" type="application/atom+xml" /><link href="http://gdfe.co/" rel="alternate" type="text/html" /><updated>2016-08-26T11:49:39-05:00</updated><id>http://gdfe.co/</id><title>gdfe.co</title><subtitle>Putting words on &lt;del&gt;paper&lt;/del&gt; the internet</subtitle><entry><title>Introducing osmar2</title><link href="http://gdfe.co/blog/Introducing-osmar2/" rel="alternate" type="text/html" title="Introducing osmar2" /><published>2016-08-23T00:00:00-05:00</published><updated>2016-08-23T00:00:00-05:00</updated><id>http://gdfe.co/blog/Introducing-osmar2</id><content type="html" xml:base="http://gdfe.co/blog/Introducing-osmar2/">&lt;p&gt;osmar2 is a version of the &lt;a href=&quot;http://cran.r-project.org/package=osmar&quot;&gt;osmar
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="http://gdfe.co/feed.xml" rel="self" type="application/atom+xml" /><link href="http://gdfe.co/" rel="alternate" type="text/html" /><updated>2017-04-02T12:59:46-05:00</updated><id>http://gdfe.co/</id><title>gdfe.co</title><subtitle>Putting words on &lt;del&gt;paper&lt;/del&gt; the internet</subtitle><entry><title>Smoking Cohort Explorations - BRFSS data</title><link href="http://gdfe.co/blog/BRFSS-First-Look/" rel="alternate" type="text/html" title="Smoking Cohort Explorations - BRFSS data" /><published>2017-04-02T00:00:00-05:00</published><updated>2017-04-02T00:00:00-05:00</updated><id>http://gdfe.co/blog/BRFSS-First-Look</id><content type="html" xml:base="http://gdfe.co/blog/BRFSS-First-Look/">&lt;p&gt;I’m trying to build a age-period-cohort model of smoking using the
+various MPC cleaned datasets. Since I have the most experience with
+BRFSS, I started with just some simple visualizations looking at the
+data through a cohort lense. Things run a bit slow to use srvyr or
+survey functions to get estimates of variance, so I’ll just use weighted
+means and rely on inter-year variability to show the variation (at least
+for now, for this exploratory work).&lt;/p&gt;
+
+&lt;p&gt;I think the best graphs come from the most simple variable whether the
+respondent has smoked 100 cigarettes total in their lifetime. Here they
+are in gif form:
+&lt;img src=&quot;/images/blog/2017-04-02/unnamed-chunk-2-1.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;If that gif makes your head swim, here’s a faceted graph showing every
+5th cohort’s trends.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/blog/2017-04-02/unnamed-chunk-3-1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I see 4 phases of broad trends:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Not enough data (Roughly 1890-1905)&lt;/strong&gt;&lt;br /&gt;
+At first there’s just not enough data and so there’s too much
+variation to see any clear trends. BRFSS doesn’t have a lot of
+people in the older age groups. A big part of this is due to people
+dying, but also the BRFSS sample frame doesn’t cover nursing homes
+or long-term care facilities so it’s coverage of older respondents
+is pretty poor. Further, to make this anaysis as simple as possible,
+I don’t include respondents in the top-coded age categories (97 in
+1984, 80 in 2012 and later, and 99 in all other years).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Differential mortality &amp;amp; women catch up (Roughly 1905-1935)&lt;/strong&gt;&lt;br /&gt;
+Because we are looking at ever smoking, the fact that the slope goes
+down is somewhat confusing. For each person, they can never change
+from an ever smoker to a never smoker. Yet, the percentage of the
+cohort who are ever smokers goes down in this period. This is
+self-reported data of course, so some of it could be changes in
+recall or social desirability bias as time goes on, but a big part
+of it is likely due to the fact that there is differential mortality
+between people who have ever smoked and those who have not. This can
+be caused both by the harmful effects of smoking as well as other
+behaviors that are correlated with smoking such as alcohol and other
+drugs and other risk behaviors.&lt;/p&gt;
+
+    &lt;p&gt;Another interesting thing to look at in this phase of the gif is that
+women are catching up to men in smoking prevalence. Presumably this is
+evidence of women’s liberation and other changes in social norms around
+women’s behavior.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Rates fall, and men converge to women (Roughly 1935-1965)&lt;/strong&gt;&lt;br /&gt;
+After generally increasing (probably partly due to differential
+mortality), the rates begin to fall pretty quickly cohort birth year
+over year. At the beginning of this phase, ~75% of men and 60% of
+women have ever smoked, and by the end they are below 50%.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Seeing introduction of smoking (1965-2013)&lt;/strong&gt; 
+These groups are the first that we are seeing young enough for 
+significant numbers of new ever smokers to be introduced (both because 
+they are younger when the first survey interviewed them and because the age of smoking introduction is getting older). This is shown by the 
+upward trend for each cohort. It appears like men are starting to smoke 
+more than women again, though there’s not enough data to be completely 
+sure.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Those are the first set of graphs I made from BRFSS. Hopefully soon I’ll
+show something about currently smoking and retrospective prevalence from
+BRFSS as well as some of the other surveys we have harmonized (YRBSS,
+NSDUH, NHIS).&lt;/p&gt;
+
+&lt;p&gt;I can’t really share the data yet (hopefully soon), but here’s the code
+used to produce these plots (man it’d be nice to have collapsible code
+blocks in this blog CMS).&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;suppressPackageStartupMessages({
+  library(dplyr)
+  library(gganimate) # requires devtools::install_github(&quot;gergness/gganimate@1d611fa&quot;)
+  library(ggplot2)
+  library(mpctools)
+  library(purrr)
+  library(readr)
+  library(srvyr)
+  library(tibble)
+  library(tidyr)
+})
+
+# Load data ---------
+out_dir &amp;lt;- &quot;~/smoking_age_cohort/interim_data/&quot;
+brfss_years &amp;lt;- 1984:2013
+
+calc_age_clean &amp;lt;- function(age, year) {
+  # NAs for top code because we don&#39;t know their real age...
+  ifelse((year == 1984 &amp;amp; age &amp;gt;= 97) |
+           (year &amp;gt;= 1985 &amp;amp; year &amp;lt;= 2012 &amp;amp; age &amp;gt;= 99) | 
+           (year == 2013 &amp;amp; age &amp;gt;= 80), 
+         NA, age)
+  
+}
+
+all_brfss &amp;lt;- map_df(brfss_years, function(yyy) {
+  out &amp;lt;- readRDS(paste0(out_dir, &quot;/person/brfss&quot;, yyy, &quot;a.Rds&quot;)) %&amp;gt;%
+    set_names(tolower(names(.))) %&amp;gt;% 
+    mutate(
+      age = as.numeric(age), 
+      age_clean = calc_age_clean(age, yyy),
+      cohort = yyy - age_clean,
+      sex = haven::as_factor(sex), 
+      survey_year = yyy
+    ) %&amp;gt;% 
+    filter(!is.na(age_clean))
+  
+  # Get weights
+  if (yyy &amp;lt;= 2010) {
+    out &amp;lt;- mutate(out, weights = landwt)
+  } else {
+    out &amp;lt;-  mutate(out, weights = llcpwt)
+  }   
+  
+  out
+})
+
+
+# Calcualte ever Smoked -------------
+calc_smokev_bin &amp;lt;- function(smokev) {
+  smokev == 2
+}
+
+ever_smoked_data &amp;lt;- all_brfss %&amp;gt;%
+  mutate(
+    smokev_bin = calc_smokev_bin(smokev), 
+    year = survey_year
+  ) %&amp;gt;%
+  group_by(sex, age_clean, cohort, year) %&amp;gt;%
+  summarize(
+    ever_smoked = weighted.mean(smokev_bin, weights, na.rm = TRUE), 
+    n = sum(!is.na(smokev_bin))
+  )
+
+# Animated plot ------------
+ever_smoked_plot_data &amp;lt;- ever_smoked_data %&amp;gt;% 
+  # To make graphs more readable
+  filter(cohort &amp;gt; 1905)
+plot &amp;lt;- ggplot(
+  ever_smoked_plot_data, 
+  aes(x = year, y = ever_smoked, group = paste0(sex, &quot;-&quot;, cohort), color = sex, 
+      frame = cohort, cumulative = TRUE, alpha_decay = function(x) exp(-x/5))
+) + 
+  geom_line() +
+  geom_point() +
+  theme_bw() + 
+  scale_color_manual(values = c(&quot;#984ea3&quot;, &quot;#ff7f00&quot;)) + 
+  scale_y_continuous(&quot;Ever smoked&quot;, labels = scales::percent) + 
+  labs(
+    title = &quot;Cohort: &quot;,
+    subtitle = &quot;Prevalence of ever smoking&quot;, 
+    caption = &quot;Data: BRFSS 1984-2013&quot;
+  )
+
+gg_animate(plot, interval = 0.15)
+
+# Static plot ------------
+ever_smoked_plot_data &amp;lt;- ever_smoked_data %&amp;gt;% 
+  # To make graphs more readable
+  filter(cohort %in% seq(1905, 2005, by = 5))
+  
+ggplot(ever_smoked_plot_data, aes(x = year, y = ever_smoked, group = sex, color = sex)) + 
+  geom_line() +
+  geom_point() +
+  facet_wrap(~cohort) + 
+  theme_bw() + 
+  scale_color_manual(values = c(&quot;#984ea3&quot;, &quot;#ff7f00&quot;)) + 
+  scale_y_continuous(&quot;Ever smoked&quot;, labels = scales::percent) + 
+  labs(
+    title = &quot;Prevalence of ever smoking by cohort (every 5th year)&quot;, 
+    caption = &quot;Data: BRFSS 1984-2013&quot;
+  )
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;</content><author><name>Greg</name></author><category term="smoking" /><summary>I’m trying to build a age-period-cohort model of smoking using the
+various MPC cleaned datasets. Since I have the most experience with
+BRFSS, I started with just some simple visualizations looking at the
+data through a cohort lense. Things run a bit slow to use srvyr or
+survey functions to get estimates of variance, so I’ll just use weighted
+means and rely on inter-year variability to show the variation (at least
+for now, for this exploratory work).</summary></entry><entry><title>Ugh</title><link href="http://gdfe.co/blog/Ugh/" rel="alternate" type="text/html" title="Ugh" /><published>2017-03-31T00:00:00-05:00</published><updated>2017-03-31T00:00:00-05:00</updated><id>http://gdfe.co/blog/Ugh</id><content type="html" xml:base="http://gdfe.co/blog/Ugh/">&lt;p&gt;Well, didn’t quite live up to the promise of writing here very often…&lt;/p&gt;
+
+&lt;p&gt;I’m hoping writing some shorter posts will get me going again.&lt;/p&gt;</content><author><name>Greg</name></author><category term="meta" /><summary>Well, didn’t quite live up to the promise of writing here very often…</summary></entry><entry><title>Color Scheme</title><link href="http://gdfe.co/blog/Color-Scheme/" rel="alternate" type="text/html" title="Color Scheme" /><published>2017-03-31T00:00:00-05:00</published><updated>2017-03-31T00:00:00-05:00</updated><id>http://gdfe.co/blog/Color-Scheme</id><content type="html" xml:base="http://gdfe.co/blog/Color-Scheme/">&lt;p&gt;I spent an embarassingly long time trying to come up with the color
+scheme for this website. I swear I didn’t realize that it is the default
+colors for a 2 group graph in ggplot2&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;library(ggplot2)
+#&amp;gt; Warning: package &#39;ggplot2&#39; was built under R version 3.3.2
+ggplot(mtcars, aes(x = mpg, y = wt, group = am, color = factor(am))) +
+  geom_point() + 
+  geom_smooth()
+#&amp;gt; `geom_smooth()` using method = &#39;loess&#39;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/blog/2017-03-31/unnamed-chunk-2-1.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;</content><author><name>Greg</name></author><summary>I spent an embarassingly long time trying to come up with the color
+scheme for this website. I swear I didn’t realize that it is the default
+colors for a 2 group graph in ggplot2</summary></entry><entry><title>Introducing osmar2</title><link href="http://gdfe.co/blog/Introducing-osmar2/" rel="alternate" type="text/html" title="Introducing osmar2" /><published>2016-08-23T00:00:00-05:00</published><updated>2016-08-23T00:00:00-05:00</updated><id>http://gdfe.co/blog/Introducing-osmar2</id><content type="html" xml:base="http://gdfe.co/blog/Introducing-osmar2/">&lt;p&gt;osmar2 is a version of the &lt;a href=&quot;http://cran.r-project.org/package=osmar&quot;&gt;osmar
 package&lt;/a&gt; (“OpenStreetMap and
 R”) rewritten to use xml2 package instead of XML, and some other
 adaptations to allow for much quicker reading of .osm files. It’s
@@ -183,191 +389,7 @@ know&lt;/a&gt;.&lt;/p&gt;</content><author><name>Greg</name></author><category t
 package (“OpenStreetMap and
 R”) rewritten to use xml2 package instead of XML, and some other
 adaptations to allow for much quicker reading of .osm files. It’s
-available on github.</summary></entry><entry><title>Introducing Osmar2</title><link href="http://gdfe.co/blog/Introducing-osmar2/" rel="alternate" type="text/html" title="Introducing Osmar2" /><published>2016-08-23T00:00:00-05:00</published><updated>2016-08-23T00:00:00-05:00</updated><id>http://gdfe.co/blog/Introducing-osmar2</id><content type="html" xml:base="http://gdfe.co/blog/Introducing-osmar2/">\---  
-layout: post  
-title: Introducing osmar2  
-author: Greg  
-tags: osmar2  
-\---  
-
-
-```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = &quot;#&gt;&quot;,
-  fig.path = &quot;images/blog/2016-08-23/&quot;,
-  retina = TRUE
-)
-knitr::opts_knit$set(base.dir = &quot;../&quot;, 
-                     base.url = &quot;/&quot;)
-
-suppressPackageStartupMessages({
-  library(dplyr)
-  library(xml2)  
-  library(tidyr)
-  library(microbenchmark)
-})
-```
-osmar2 is a version of the [osmar package](http://cran.r-project.org/package=osmar) 
-(&quot;OpenStreetMap and R&quot;) rewritten to use xml2 package instead of XML, 
-and some other adaptations to allow for much quicker reading of .osm files. It&#39;s 
-available on [github](https://github.com/gergness/osmar2).
-
-The part I wanted to spend some time writing about here was the optimization and 
-debugging process that went into making it faster. Going into this project, I was
-pretty sure that the package there were inefficiencies in reading files because even
-though the files were relatively small (10Mb), osmar was already taking several minutes 
-to load, whereas a `read.csv()` (or better, `readr::read_csv()`) could
-read that size in less than a second.
-
-So, I first thought that just switching over to xml2 would be most of what I needed, but 
-when I had finished rewriting the code using the original osmar package&#39;s approach updated
-with xml2 funcitons instead of XML, there wasn&#39;t much of an improvement.What ended up 
-speeding things up was a change in the parsing algorithm.
-
-Here&#39;s a sample osm xml file, which I&#39;ve simplified so that only has a few nodes and 
-have removed some tags that aren&#39;t used (more details on osm files 
-[here](http://wiki.openstreetmap.org/wiki/OSM_XML)).
-
-```{r, echo = FALSE}
-small_file &lt;- tempfile()
-download.file(&quot;https://dl.dropboxusercontent.com/u/2019891/osmar2/TC_small_osm_file.osm&quot;, small_file)
-
-osm_lines &lt;- readLines(small_file)
-
-# Some arbitrary lines to get a sense of file structure
-osm_lines[c(1545:1548, 1553:1557)] %&gt;% 
-  c(&quot;\t...&quot;, ., &quot;\t...&quot;) %&gt;% 
-  paste(collapse = &quot;\n&quot;) %&gt;%
-  cat()
-
-# Read it in as an xml file
-osm_xml &lt;- read_xml(small_file)
-osm_xml_root &lt;- xml_root(osm_xml)
-
-```
-
-One of the slowest part of parsing the file in the original osmar package is
-when creating a dataset of the tag variables. This dataset needs one row per `tag` node,
-but includes a variable from that `tag`&#39;s parent `node` (the `id` variable). 
-`id` from the node. The original way I attacked this looked something like this:
-
-```{r}
-old_method &lt;- function() {
-  # Find all of the nodes with at least one tag
-  nodes &lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
-  
-  # Pull those nodes&#39; ids
-  ids &lt;- xml_attr(nodes, &quot;id&quot;)
-  
-  # Pull those nodes&#39; (1 or more) tags into a list of data.frames()
-  tags &lt;- lapply(nodes, function(parent_node) {
-    tag_nodes &lt;- xml_find_all(parent_node, &quot;./tag&quot;)
-    
-    data_frame(k = xml_attr(tag_nodes, &quot;k&quot;), 
-               v = xml_attr(tag_nodes, &quot;v&quot;))
-  })
-  
-  # And convert that to a single long data.frame
-  out_df &lt;- data_frame(ids, 
-                       tags = tags) %&gt;%
-    unnest()
-  
-  out_df
-}
-
-old &lt;- old_method() 
-old %&gt;% print(n = 3)
-```
-
-As I began to dig into this, I learned that some of the xml2 functions allow you to
-perform the entire operations in C and so are very fast, while others force the code
-into R objects and so have much slower looping. So, it doesn&#39;t always make sense
-to try to save your place in the xml document to avoid having to repeatedly search
-for the same spots, because this may force you to loop in R rather than C. For example:
-
-```{r}
-system.time(
-  osm_xml_root %&gt;% 
-    xml_find_all(&quot;/osm/node&quot;) %&gt;%
-    xml_find_all(&quot;tag/@k&quot;) %&gt;% 
-    xml_text()
-)
-
-# Is 30X slower than this:
-
-system.time(
-  osm_xml_root %&gt;%
-    xml_find_all(&quot;/osm/node/tag/@k&quot;) %&gt;%
-    xml_text()
-)
-
-# So even though the second method requires us to search from the top
-# of the tree for the k and v variable separately, it is still faster.
-```
-
-The only problem being that we need a way to find out which node id this particular
-key/value belong to. This requires some tricky(-ish) xpath.
-
-```{r}
-# Find all nodes with at least one tag and get their id
-nodes &lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
-id &lt;- xml_attr(nodes, &quot;id&quot;)
-# Find out how many tags are below each of these nodes and
-# repeat the id that many times
-lens &lt;- xml_find_num(nodes, &quot;count(./tag)&quot;)
-id &lt;- rep(id, lens)
-```
-
-Putting it all together, we get:
-```{r}
-new_method &lt;- function() {
-  # Find all of the nodes with at least one tag and pull their ids
-  nodes &lt;- xml_find_all(osm_xml_root, &quot;/osm/node[./tag]&quot;)
-  ids &lt;- xml_attr(nodes, &quot;id&quot;)
-  
-  # Find out how many tags are below each of these nodes and
-  # repeat the id that many times
-  lens &lt;- xml_find_num(nodes, &quot;count(./tag)&quot;)
-  ids &lt;- rep(ids, lens)
-  
-  # Pull the tag&#39;s keys and values
-  keys &lt;- osm_xml_root %&gt;%
-    xml_find_all(&quot;/osm/node/tag/@k&quot;) %&gt;%
-    xml_text()
-  
-  values &lt;- osm_xml_root %&gt;%
-    xml_find_all(&quot;/osm/node/tag/@v&quot;) %&gt;%
-    xml_text()
-  
-  data_frame(ids = ids,
-             k = keys,
-             v = values)
-}
-new &lt;- new_method()
-new %&gt;% print(n = 3)
-```
-
-Which gives the same result, but much more quickly than the old method:
-
-```{r}
-microbenchmark(old = old &lt;- old_method(), 
-               new = new &lt;- new_method(), 
-               times = 5)
-
-identical(old, new)
-```
-
-This makes me wonder whether it&#39;d be easier for xml2 to have a function along 
-the lines of `xml_find_list()` so that you could more easily select multiple 
-queries using the quicker C code. I&#39;m not exactly sure how this would work though.
-Also, possibly I&#39;m missing something and there&#39;s an easier way to do this. If there is, 
-[let me know](mailto:gdfe.co.mail@gmail.com).</content><summary>\---  
-layout: post  
-title: Introducing osmar2  
-author: Greg  
-tags: osmar2  
-\---</summary></entry><entry><title>The Project</title><link href="http://gdfe.co/blog/The-Project/" rel="alternate" type="text/html" title="The Project" /><published>2016-08-03T00:00:00-05:00</published><updated>2016-08-03T00:00:00-05:00</updated><id>http://gdfe.co/blog/The-Project</id><content type="html" xml:base="http://gdfe.co/blog/The-Project/">&lt;p&gt;A project that’s been on my mind lately is to make a map of the Twin Cities 
+available on github.</summary></entry><entry><title>The Project</title><link href="http://gdfe.co/blog/The-Project/" rel="alternate" type="text/html" title="The Project" /><published>2016-08-03T00:00:00-05:00</published><updated>2016-08-03T00:00:00-05:00</updated><id>http://gdfe.co/blog/The-Project</id><content type="html" xml:base="http://gdfe.co/blog/The-Project/">&lt;p&gt;A project that’s been on my mind lately is to make a map of the Twin Cities 
 to hang on the wall. I’ve always thought maps are pretty and the visualization 
 of data feels like a fun way to try to have a more artistic outlet than I’ve 
 traditionally been able to find.&lt;/p&gt;

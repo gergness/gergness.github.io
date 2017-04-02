@@ -1,0 +1,30 @@
+---
+output: md_document
+---
+
+\---  
+layout: post  
+title: Color Scheme  
+author: Greg  
+\---  
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "images/blog/2017-03-31/",
+  retina = TRUE
+)
+knitr::opts_knit$set(base.dir = "../", 
+                     base.url = "/")
+```
+
+
+I spent an embarassingly long time trying to come up with the color scheme for this website. I swear I didn't realize that it is the default colors for a 2 group graph in ggplot2
+
+```{r}
+library(ggplot2)
+ggplot(mtcars, aes(x = mpg, y = wt, group = am, color = factor(am))) +
+  geom_point() + 
+  geom_smooth()
+```

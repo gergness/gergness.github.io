@@ -17,7 +17,6 @@ I think the best graphs come from the most simple variable whether the
 respondent has smoked 100 cigarettes total in their lifetime. Here they
 are in gif form:
 
-![](/images/blog/2017-04-02/unnamed-chunk-2-1.gif)
 
 If that gif makes your head swim, here's a faceted graph showing every
 5th cohort's trends.

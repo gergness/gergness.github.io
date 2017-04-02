@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="http://gdfe.co/feed.xml" rel="self" type="application/atom+xml" /><link href="http://gdfe.co/" rel="alternate" type="text/html" /><updated>2017-04-02T12:59:46-05:00</updated><id>http://gdfe.co/</id><title>gdfe.co</title><subtitle>Putting words on &lt;del&gt;paper&lt;/del&gt; the internet</subtitle><entry><title>Smoking Cohort Explorations - BRFSS data</title><link href="http://gdfe.co/blog/BRFSS-First-Look/" rel="alternate" type="text/html" title="Smoking Cohort Explorations - BRFSS data" /><published>2017-04-02T00:00:00-05:00</published><updated>2017-04-02T00:00:00-05:00</updated><id>http://gdfe.co/blog/BRFSS-First-Look</id><content type="html" xml:base="http://gdfe.co/blog/BRFSS-First-Look/">&lt;p&gt;I’m trying to build a age-period-cohort model of smoking using the
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="http://gdfe.co/feed.xml" rel="self" type="application/atom+xml" /><link href="http://gdfe.co/" rel="alternate" type="text/html" /><updated>2017-04-02T13:13:45-05:00</updated><id>http://gdfe.co/</id><title>gdfe.co</title><subtitle>Putting words on &lt;del&gt;paper&lt;/del&gt; the internet</subtitle><entry><title>Smoking Cohort Explorations - BRFSS data</title><link href="http://gdfe.co/blog/BRFSS-First-Look/" rel="alternate" type="text/html" title="Smoking Cohort Explorations - BRFSS data" /><published>2017-04-02T00:00:00-05:00</published><updated>2017-04-02T00:00:00-05:00</updated><id>http://gdfe.co/blog/BRFSS-First-Look</id><content type="html" xml:base="http://gdfe.co/blog/BRFSS-First-Look/">&lt;p&gt;I’m trying to build a age-period-cohort model of smoking using the
 various MPC cleaned datasets. Since I have the most experience with
 BRFSS, I started with just some simple visualizations looking at the
 data through a cohort lense. Things run a bit slow to use srvyr or
@@ -8,8 +8,9 @@ for now, for this exploratory work).&lt;/p&gt;
 
 &lt;p&gt;I think the best graphs come from the most simple variable whether the
 respondent has smoked 100 cigarettes total in their lifetime. Here they
-are in gif form:
-&lt;img src=&quot;/images/blog/2017-04-02/unnamed-chunk-2-1.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+are in gif form:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/blog/2017-04-02/unnamed-chunk-2-1.gif&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;If that gif makes your head swim, here’s a faceted graph showing every
 5th cohort’s trends.&lt;/p&gt;
